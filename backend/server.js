@@ -2,6 +2,8 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
+import productRoutes from './routes/productRoutes.js';
+import uploadRoutes from './routes/uploadRoutes.js';
 
 dotenv.config();
 console.log("MONGO_URI:", process.env.MONGO_URI);
@@ -15,6 +17,9 @@ app.use(cors());
 app.get('/', (req, res) => {
   res.send('API is running');
 });
+
+app.use('/api/products', productRoutes);
+app.use('/api/upload', uploadRoutes);
 
 const startServer = async () => {
   await connectDB();

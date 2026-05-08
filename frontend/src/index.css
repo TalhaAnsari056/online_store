@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "system-ui", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", sans-serif;
+}
+
+body {
+  @apply m-0 bg-slate-50 text-slate-800 antialiased;
+}
