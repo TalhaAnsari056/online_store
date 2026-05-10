@@ -1,18 +1,27 @@
 import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { HiBars3BottomRight, HiMagnifyingGlass, HiMoon, HiSun, HiXMark } from 'react-icons/hi2';
 import { FiChevronDown, FiShoppingBag, FiUser } from 'react-icons/fi';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 
-const navLinks = [
-  { to: '/', label: 'Home' },
-  { to: '/shop', label: 'Shop' },
-  { to: '/shop?category=men', label: 'Men' },
-  { to: '/shop?category=women', label: 'Women' },
-  { to: '/shop?category=hoodies', label: 'Hoodies' },
+const categoryItems = [
+  { label: 'Men', slug: 'men' },
+  { label: 'Women', slug: 'women' },
+  { label: 'Hoodies', slug: 'hoodies' },
+  { label: 'Sneakers', slug: 'sneakers' },
+  { label: 'Accessories', slug: 'accessories' },
 ];
 
+const navLinkBase =
+  'text-sm font-medium text-slate-600 transition-colors duration-200 hover:text-slate-950 dark:text-slate-300 dark:hover:text-slate-50';
+const navLinkActive =
+  'font-bold text-slate-950 underline decoration-2 underline-offset-8 decoration-slate-950 dark:text-slate-50 dark:decoration-slate-50';
+
 function Navbar() {
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
+  const [desktopCategoriesOpen, setDesktopCategoriesOpen] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
     return savedTheme ? savedTheme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -22,17 +31,22 @@ function Navbar() {
     document.documentElement.classList.toggle('dark', isDark);
   }, [isDark]);
 
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setIsMenuOpen(false);
+      setMobileCategoriesOpen(false);
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, [location.pathname]);
+
+  const categoryPathActive = categoryItems.some((c) => location.pathname === `/category/${c.slug}`);
+
   const toggleTheme = () => {
     const nextThemeIsDark = !isDark;
     setIsDark(nextThemeIsDark);
     document.documentElement.classList.toggle('dark', nextThemeIsDark);
     localStorage.setItem('theme', nextThemeIsDark ? 'dark' : 'light');
   };
-
-  const activeClass =
-    'font-semibold text-slate-950 underline decoration-2 underline-offset-8 dark:text-slate-50';
-  const baseClass =
-    'text-sm font-medium text-slate-700 transition hover:text-slate-950 dark:text-slate-300 dark:hover:text-slate-50';
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/85">
@@ -42,21 +56,72 @@ function Navbar() {
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex">
-          {navLinks.map((link) => (
-            <NavLink
-              key={link.label}
-              to={link.to}
-              className={({ isActive }) => `${baseClass} ${isActive ? activeClass : ''}`}
-            >
-              {link.label}
-            </NavLink>
-          ))}
-          <button
-            type="button"
-            className="flex items-center gap-1 text-sm font-medium text-slate-700 transition hover:text-indigo-600 dark:text-slate-200 dark:hover:text-indigo-400"
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : ''}`}
           >
-            Categories <FiChevronDown />
-          </button>
+            Home
+          </NavLink>
+          <NavLink
+            to="/shop"
+            className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : ''}`}
+          >
+            Shop
+          </NavLink>
+
+          <div
+            className="relative"
+            onMouseEnter={() => setDesktopCategoriesOpen(true)}
+            onMouseLeave={() => setDesktopCategoriesOpen(false)}
+          >
+            <button
+              type="button"
+              className={`flex items-center gap-1 text-sm font-medium transition-colors duration-200 ${
+                categoryPathActive
+                  ? `${navLinkActive}`
+                  : 'text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-slate-50'
+              }`}
+              aria-expanded={desktopCategoriesOpen}
+              aria-haspopup="true"
+            >
+              Categories
+              <FiChevronDown
+                className={`transition-transform duration-200 ${desktopCategoriesOpen ? 'rotate-180' : ''}`}
+                size={16}
+              />
+            </button>
+
+            <AnimatePresence>
+              {desktopCategoriesOpen ? (
+                <motion.div
+                  initial={{ opacity: 0, y: -6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18, ease: 'easeOut' }}
+                  className="absolute left-0 top-full z-50 w-52 pt-2"
+                >
+                  <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 py-2 shadow-xl backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/95">
+                  {categoryItems.map((item) => (
+                    <NavLink
+                      key={item.slug}
+                      to={`/category/${item.slug}`}
+                      className={({ isActive }) =>
+                        `block px-4 py-2.5 text-sm transition-colors duration-150 ${
+                          isActive
+                            ? 'bg-slate-100 font-bold text-slate-950 underline decoration-2 underline-offset-4 dark:bg-slate-800 dark:text-slate-50'
+                            : 'text-slate-700 hover:bg-slate-50 hover:text-slate-950 dark:text-slate-200 dark:hover:bg-slate-800/80 dark:hover:text-white'
+                        }`
+                      }
+                    >
+                      {item.label}
+                    </NavLink>
+                  ))}
+                </div>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+          </div>
         </nav>
 
         <div className="relative ml-auto hidden w-full max-w-xs lg:block">
@@ -88,13 +153,19 @@ function Navbar() {
           </span>
         </Link>
 
-        <Link
+        <NavLink
           to="/login"
-          className="hidden items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-indigo-600 dark:bg-indigo-500 dark:hover:bg-indigo-400 sm:inline-flex"
+          className={({ isActive }) =>
+            `hidden items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition hover:-translate-y-0.5 sm:inline-flex ${
+              isActive
+                ? 'bg-slate-950 text-white dark:bg-white dark:text-slate-900'
+                : 'bg-slate-900 text-white hover:bg-indigo-600 dark:bg-indigo-500 dark:hover:bg-indigo-400'
+            }`
+          }
         >
           <FiUser size={16} />
           Login
-        </Link>
+        </NavLink>
 
         <button
           type="button"
@@ -106,30 +177,91 @@ function Navbar() {
         </button>
       </div>
 
-      {isMenuOpen ? (
-        <div className="border-t border-slate-200 px-4 py-4 lg:hidden dark:border-slate-800">
-          <div className="relative mb-4">
-            <HiMagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search products..."
-              className="w-full rounded-full border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-            />
-          </div>
-          <nav className="flex flex-col gap-3">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.label}
-                to={link.to}
-                onClick={() => setIsMenuOpen(false)}
-                className={({ isActive }) => `text-sm font-medium ${isActive ? activeClass : baseClass}`}
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
-        </div>
-      ) : null}
+      <AnimatePresence>
+        {isMenuOpen ? (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            className="overflow-hidden border-t border-slate-200 lg:hidden dark:border-slate-800"
+          >
+            <div className="px-4 py-4">
+              <div className="relative mb-4">
+                <HiMagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  className="w-full rounded-full border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                />
+              </div>
+              <nav className="flex flex-col gap-1">
+                <NavLink
+                  to="/"
+                  end
+                  onClick={() => setIsMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `rounded-lg px-3 py-2 text-sm ${isActive ? navLinkActive : navLinkBase}`
+                  }
+                >
+                  Home
+                </NavLink>
+                <NavLink
+                  to="/shop"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `rounded-lg px-3 py-2 text-sm ${isActive ? navLinkActive : navLinkBase}`
+                  }
+                >
+                  Shop
+                </NavLink>
+                <div className="mt-1 border-t border-slate-200 pt-2 dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setMobileCategoriesOpen((v) => !v)}
+                    className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 dark:text-slate-200"
+                  >
+                    Categories
+                    <FiChevronDown
+                      className={`transition-transform duration-200 ${mobileCategoriesOpen ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                  <AnimatePresence>
+                    {mobileCategoriesOpen ? (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden pl-2"
+                      >
+                        <div className="flex flex-col border-l border-slate-200 py-1 dark:border-slate-700">
+                          {categoryItems.map((item) => (
+                            <NavLink
+                              key={item.slug}
+                              to={`/category/${item.slug}`}
+                              onClick={() => setIsMenuOpen(false)}
+                              className={({ isActive }) =>
+                                `px-3 py-2 text-sm ${
+                                  isActive
+                                    ? 'font-bold text-slate-950 underline decoration-2 underline-offset-4 dark:text-slate-50'
+                                    : 'text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white'
+                                }`
+                              }
+                            >
+                              {item.label}
+                            </NavLink>
+                          ))}
+                        </div>
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
+                </div>
+              </nav>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </header>
   );
 }

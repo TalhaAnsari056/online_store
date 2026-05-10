@@ -47,13 +47,13 @@ function HeroSection() {
           className="mt-8 flex flex-wrap gap-3"
         >
           <Link
-            to="/shop?category=men"
+            to="/category/men"
             className="rounded-full bg-white px-6 py-3 text-sm font-semibold text-black transition hover:-translate-y-0.5 hover:bg-slate-200"
           >
             Shop Men
           </Link>
           <Link
-            to="/shop?category=women"
+            to="/category/women"
             className="rounded-full border border-white/30 px-6 py-3 text-sm font-semibold transition hover:-translate-y-0.5 hover:border-white"
           >
             Shop Women

@@ -20,7 +20,7 @@ function CategorySection() {
         {categories.map((category) => (
           <motion.div key={category.slug} whileHover={{ y: -6 }} transition={{ duration: 0.25 }}>
             <Link
-              to={`/shop?category=${category.slug}`}
+              to={`/category/${category.slug}`}
               className="group relative block overflow-hidden rounded-2xl border border-slate-200 bg-slate-950 p-5 dark:border-slate-800"
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.2),_rgba(0,0,0,0.9)_60%)] transition duration-500 group-hover:scale-110" />

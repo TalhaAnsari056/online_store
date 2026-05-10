@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { FaInstagram, FaTiktok, FaXTwitter, FaYoutube } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
 
@@ -6,9 +7,21 @@ const quickLinks = [
   { to: '/shop', label: 'Shop' },
   { to: '/cart', label: 'Cart' },
   { to: '/login', label: 'Login' },
+  { to: '/register', label: 'Register' },
 ];
 
-const categories = ['Men', 'Women', 'Hoodies', 'Sneakers', 'Accessories'];
+const categories = [
+  { label: 'Men', slug: 'men' },
+  { label: 'Women', slug: 'women' },
+  { label: 'Hoodies', slug: 'hoodies' },
+  { label: 'Sneakers', slug: 'sneakers' },
+  { label: 'Accessories', slug: 'accessories' },
+];
+
+const linkMotion = {
+  whileHover: { x: 4 },
+  transition: { type: 'spring', stiffness: 400, damping: 25 },
+};
 
 function Footer() {
   return (
@@ -29,13 +42,14 @@ function Footer() {
           </h4>
           <div className="space-y-2">
             {quickLinks.map((link) => (
-              <Link
-                key={link.label}
-                to={link.to}
-                className="block text-sm text-slate-600 transition hover:translate-x-1 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400"
-              >
-                {link.label}
-              </Link>
+              <motion.div key={link.label} {...linkMotion}>
+                <Link
+                  to={link.to}
+                  className="block text-sm text-slate-600 transition-colors duration-200 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white"
+                >
+                  {link.label}
+                </Link>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -46,9 +60,14 @@ function Footer() {
           </h4>
           <div className="space-y-2">
             {categories.map((item) => (
-              <p key={item} className="text-sm text-slate-600 dark:text-slate-300">
-                {item}
-              </p>
+              <motion.div key={item.slug} {...linkMotion}>
+                <Link
+                  to={`/category/${item.slug}`}
+                  className="block text-sm text-slate-600 transition-colors duration-200 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white"
+                >
+                  {item.label}
+                </Link>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -59,14 +78,16 @@ function Footer() {
           </h4>
           <div className="flex items-center gap-3">
             {[FaInstagram, FaXTwitter, FaTiktok, FaYoutube].map((Icon, index) => (
-              <a
+              <motion.a
                 key={index}
                 href="#"
-                className="rounded-full border border-slate-300 p-2 text-slate-700 transition hover:-translate-y-0.5 hover:border-indigo-500 hover:text-indigo-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-indigo-400 dark:hover:text-indigo-400"
+                whileHover={{ y: -3, scale: 1.05 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                className="rounded-full border border-slate-300 p-2 text-slate-700 transition-colors hover:border-indigo-500 hover:text-indigo-600 dark:border-slate-700 dark:text-slate-200 dark:hover:border-indigo-400 dark:hover:text-indigo-400"
                 aria-label="Social link"
               >
                 <Icon size={16} />
-              </a>
+              </motion.a>
             ))}
           </div>
         </div>
