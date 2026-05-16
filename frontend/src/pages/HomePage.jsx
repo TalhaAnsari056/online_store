@@ -2,9 +2,10 @@ import { Component, Suspense, useMemo } from 'react';
 import CategorySection from '../components/CategorySection';
 import HeroSection from '../components/HeroSection';
 import NewsletterSection from '../components/NewsletterSection';
-import ProductGrid from '../components/ProductGrid';
+import ProductSection from '../components/ProductSection';
 import ProductSkeleton from '../components/ProductSkeleton';
 import { useProducts } from '../hooks/useProducts';
+import { categoryToSlug, normalizeSlug } from '../utils/productHelpers';
 
 class ProductSectionErrorBoundary extends Component {
   constructor(props) {
@@ -31,31 +32,49 @@ class ProductSectionErrorBoundary extends Component {
   }
 }
 
-function TrendingProductsSection() {
+function HomeProductSections() {
   const { data: products } = useProducts();
-  const trendingProducts = useMemo(() => products.slice(0, 8), [products]);
+
+  const { trending, newArrivals, popularHoodies } = useMemo(() => {
+    const featured = products.filter((product) => product.isFeatured).slice(0, 8);
+
+    const newest = [...products]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 8);
+
+    const hoodies = products
+      .filter((product) => normalizeSlug(categoryToSlug(product.category)) === 'hoodies')
+      .sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0))
+      .slice(0, 8);
+
+    return {
+      trending: featured,
+      newArrivals: newest,
+      popularHoodies: hoodies,
+    };
+  }, [products]);
 
   return (
-    <section className="space-y-5">
-      <div className="flex items-end justify-between">
-        <h2 className="text-3xl font-black tracking-tight sm:text-4xl">Trending Products</h2>
-      </div>
-      <ProductGrid products={trendingProducts} />
-    </section>
-  );
-}
-
-function NewArrivalsSection() {
-  const { data: products } = useProducts();
-  const newArrivals = useMemo(() => [...products].reverse().slice(0, 8), [products]);
-
-  return (
-    <section className="space-y-5">
-      <div className="flex items-end justify-between">
-        <h2 className="text-3xl font-black tracking-tight sm:text-4xl">New Arrivals</h2>
-      </div>
-      <ProductGrid products={newArrivals} />
-    </section>
+    <div className="space-y-14">
+      <ProductSection
+        title="Trending Products"
+        subtitle="Featured drops hand-picked by the TRENDORA team."
+        products={trending}
+        viewAllTo="/shop"
+      />
+      <ProductSection
+        title="New Arrivals"
+        subtitle="The latest pieces added to the collection."
+        products={newArrivals}
+        viewAllTo="/shop"
+      />
+      <ProductSection
+        title="Popular Hoodies"
+        subtitle="Top-rated hoodies built for layered street style."
+        products={popularHoodies}
+        viewAllTo="/category/hoodies"
+      />
+    </div>
   );
 }
 
@@ -67,13 +86,7 @@ function HomePage() {
 
       <ProductSectionErrorBoundary>
         <Suspense fallback={<ProductSkeleton count={8} />}>
-          <TrendingProductsSection />
-        </Suspense>
-      </ProductSectionErrorBoundary>
-
-      <ProductSectionErrorBoundary>
-        <Suspense fallback={<ProductSkeleton count={8} />}>
-          <NewArrivalsSection />
+          <HomeProductSections />
         </Suspense>
       </ProductSectionErrorBoundary>
 

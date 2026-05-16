@@ -1,54 +1,32 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import products from './data/products.js';
 import Product from './models/productModel.js';
 
 dotenv.config();
 
-const sampleProducts = [
-  {
-    name: 'Wireless Mouse',
-    price: 29.99,
-    description: 'Ergonomic wireless mouse with adjustable DPI.',
-    image: '/images/mouse.jpg',
-    category: 'Electronics',
-    countInStock: 25,
-  },
-  {
-    name: 'Mechanical Keyboard',
-    price: 89.99,
-    description: 'RGB mechanical keyboard with blue switches.',
-    image: '/images/keyboard.jpg',
-    category: 'Electronics',
-    countInStock: 15,
-  },
-  {
-    name: 'Running Shoes',
-    price: 59.99,
-    description: 'Lightweight running shoes for daily workouts.',
-    image: '/images/shoes.jpg',
-    category: 'Fashion',
-    countInStock: 40,
-  },
-  {
-    name: 'Insulated Water Bottle',
-    price: 19.99,
-    description: 'Stainless steel bottle that keeps drinks cold for 24 hours.',
-    image: '/images/bottle.jpg',
-    category: 'Accessories',
-    countInStock: 60,
-  },
-];
-
 const seedProducts = async () => {
+  let exitCode = 0;
+
   try {
+    if (!process.env.MONGO_URI) {
+      throw new Error('MONGO_URI is not defined in environment variables');
+    }
+
     await mongoose.connect(process.env.MONGO_URI);
-    await Product.deleteMany({});
-    const insertedProducts = await Product.insertMany(sampleProducts);
-    console.log(`Seeding successful: inserted ${insertedProducts.length} products.`);
-    process.exit(0);
+    console.log('Connected to MongoDB');
+
+    const deleteResult = await Product.deleteMany({});
+    console.log(`Removed ${deleteResult.deletedCount} existing products`);
+
+    const insertedProducts = await Product.insertMany(products);
+    console.log(`Seeding successful: inserted ${insertedProducts.length} products`);
   } catch (error) {
     console.error(`Seeding failed: ${error.message}`);
-    process.exit(1);
+    exitCode = 1;
+  } finally {
+    await mongoose.connection.close();
+    process.exit(exitCode);
   }
 };
 

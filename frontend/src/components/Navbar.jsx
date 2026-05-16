@@ -1,16 +1,10 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { HiBars3BottomRight, HiMagnifyingGlass, HiMoon, HiSun, HiXMark } from 'react-icons/hi2';
+import { HiBars3BottomRight, HiMoon, HiSun, HiXMark } from 'react-icons/hi2';
 import { FiChevronDown, FiShoppingBag, FiUser } from 'react-icons/fi';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-
-const categoryItems = [
-  { label: 'Men', slug: 'men' },
-  { label: 'Women', slug: 'women' },
-  { label: 'Hoodies', slug: 'hoodies' },
-  { label: 'Sneakers', slug: 'sneakers' },
-  { label: 'Accessories', slug: 'accessories' },
-];
+import ProductSearch from './ProductSearch';
+import { GENDER_COLLECTIONS, PRODUCT_CATEGORIES } from '../constants/catalog';
 
 const navLinkBase =
   'text-sm font-medium text-slate-600 transition-colors duration-200 hover:text-slate-950 dark:text-slate-300 dark:hover:text-slate-50';
@@ -37,10 +31,11 @@ function Navbar() {
       setMobileCategoriesOpen(false);
     }, 0);
     return () => window.clearTimeout(id);
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
-  const categoryPathActive = categoryItems.some((c) => location.pathname === `/category/${c.slug}`);
-
+  const categoryPathActive = PRODUCT_CATEGORIES.some(
+    (category) => location.pathname === `/category/${category.slug}`
+  );
   const toggleTheme = () => {
     const nextThemeIsDark = !isDark;
     setIsDark(nextThemeIsDark);
@@ -65,10 +60,22 @@ function Navbar() {
           </NavLink>
           <NavLink
             to="/shop"
-            className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : ''}`}
+            className={({ isActive }) => `${navLinkBase} ${isActive && location.pathname === '/shop' ? navLinkActive : ''}`}
           >
             Shop
           </NavLink>
+
+          <div className="flex items-center gap-4">
+            {GENDER_COLLECTIONS.map((collection) => (
+              <NavLink
+                key={collection.slug}
+                to={`/collection/${collection.slug}`}
+                className={({ isActive }) => `${navLinkBase} ${isActive ? navLinkActive : ''}`}
+              >
+                {collection.label}
+              </NavLink>
+            ))}
+          </div>
 
           <div
             className="relative"
@@ -79,7 +86,7 @@ function Navbar() {
               type="button"
               className={`flex items-center gap-1 text-sm font-medium transition-colors duration-200 ${
                 categoryPathActive
-                  ? `${navLinkActive}`
+                  ? navLinkActive
                   : 'text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-slate-50'
               }`}
               aria-expanded={desktopCategoriesOpen}
@@ -102,36 +109,33 @@ function Navbar() {
                   className="absolute left-0 top-full z-50 w-52 pt-2"
                 >
                   <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 py-2 shadow-xl backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/95">
-                  {categoryItems.map((item) => (
-                    <NavLink
-                      key={item.slug}
-                      to={`/category/${item.slug}`}
-                      className={({ isActive }) =>
-                        `block px-4 py-2.5 text-sm transition-colors duration-150 ${
-                          isActive
-                            ? 'bg-slate-100 font-bold text-slate-950 underline decoration-2 underline-offset-4 dark:bg-slate-800 dark:text-slate-50'
-                            : 'text-slate-700 hover:bg-slate-50 hover:text-slate-950 dark:text-slate-200 dark:hover:bg-slate-800/80 dark:hover:text-white'
-                        }`
-                      }
-                    >
-                      {item.label}
-                    </NavLink>
-                  ))}
-                </div>
+                    {PRODUCT_CATEGORIES.map((item) => (
+                      <NavLink
+                        key={item.slug}
+                        to={`/category/${item.slug}`}
+                        className={({ isActive }) =>
+                          `block px-4 py-2.5 text-sm transition-colors duration-150 ${
+                            isActive
+                              ? 'bg-slate-100 font-bold text-slate-950 underline decoration-2 underline-offset-4 dark:bg-slate-800 dark:text-slate-50'
+                              : 'text-slate-700 hover:bg-slate-50 hover:text-slate-950 dark:text-slate-200 dark:hover:bg-slate-800/80 dark:hover:text-white'
+                          }`
+                        }
+                      >
+                        {item.label}
+                      </NavLink>
+                    ))}
+                  </div>
                 </motion.div>
               ) : null}
             </AnimatePresence>
           </div>
         </nav>
 
-        <div className="relative ml-auto hidden w-full max-w-xs lg:block">
-          <HiMagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search streetwear..."
-            className="w-full rounded-full border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-          />
-        </div>
+        <ProductSearch
+          className="relative ml-auto hidden w-full max-w-xs lg:block"
+          inputClassName="w-full rounded-full border border-slate-300 bg-white py-2 pl-9 pr-9 text-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          id="navbar-product-search"
+        />
 
         <button
           type="button"
@@ -187,14 +191,13 @@ function Navbar() {
             className="overflow-hidden border-t border-slate-200 lg:hidden dark:border-slate-800"
           >
             <div className="px-4 py-4">
-              <div className="relative mb-4">
-                <HiMagnifyingGlass className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  className="w-full rounded-full border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                />
-              </div>
+              <ProductSearch
+                className="relative mb-4"
+                inputClassName="w-full rounded-full border border-slate-300 bg-white py-2 pl-9 pr-9 text-sm outline-none transition focus:border-indigo-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                onNavigate={() => setIsMenuOpen(false)}
+                id="mobile-product-search"
+              />
+
               <nav className="flex flex-col gap-1">
                 <NavLink
                   to="/"
@@ -215,10 +218,33 @@ function Navbar() {
                 >
                   Shop
                 </NavLink>
+
+                <div className="mt-1 border-t border-slate-200 pt-2 dark:border-slate-800">
+                  <p className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    Collections
+                  </p>
+                  {GENDER_COLLECTIONS.map((collection) => (
+                    <NavLink
+                      key={collection.slug}
+                      to={`/collection/${collection.slug}`}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={({ isActive }) =>
+                        `block rounded-lg px-3 py-2 text-sm ${
+                          isActive
+                            ? 'font-bold text-slate-950 underline decoration-2 underline-offset-4 dark:text-slate-50'
+                            : 'text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white'
+                        }`
+                      }
+                    >
+                      {collection.label}
+                    </NavLink>
+                  ))}
+                </div>
+
                 <div className="mt-1 border-t border-slate-200 pt-2 dark:border-slate-800">
                   <button
                     type="button"
-                    onClick={() => setMobileCategoriesOpen((v) => !v)}
+                    onClick={() => setMobileCategoriesOpen((value) => !value)}
                     className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-700 dark:text-slate-200"
                   >
                     Categories
@@ -236,7 +262,7 @@ function Navbar() {
                         className="overflow-hidden pl-2"
                       >
                         <div className="flex flex-col border-l border-slate-200 py-1 dark:border-slate-700">
-                          {categoryItems.map((item) => (
+                          {PRODUCT_CATEGORIES.map((item) => (
                             <NavLink
                               key={item.slug}
                               to={`/category/${item.slug}`}

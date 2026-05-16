@@ -11,28 +11,25 @@ function normalizeAxiosError(error) {
   return normalized;
 }
 
-function normalizeCategory(value) {
-  return String(value || '')
-    .toLowerCase()
-    .trim();
-}
+function buildQueryParams(filters = {}) {
+  const params = {};
 
-function productMatchesCategory(product, filterSlug) {
-  if (!filterSlug) return true;
-  const cat = normalizeCategory(product?.category);
-  const slug = normalizeCategory(filterSlug);
-  if (!cat) return false;
-  if (cat === slug) return true;
-  if (cat.replace(/\s+/g, '-') === slug) return true;
-  return false;
+  if (filters.category) params.category = filters.category;
+  if (filters.gender) params.gender = filters.gender;
+  if (filters.keyword) params.keyword = filters.keyword;
+  if (filters.featured) params.featured = 'true';
+  if (filters.sort) params.sort = filters.sort;
+
+  return params;
 }
 
 /**
+ * @param {object} [filters]
  * @returns {Promise<Array>}
  */
-export async function getProducts() {
+export async function getProducts(filters = {}) {
   try {
-    const { data } = await api.get('/products');
+    const { data } = await api.get('/products', { params: buildQueryParams(filters) });
     return Array.isArray(data) ? data : [];
   } catch (error) {
     throw normalizeAxiosError(error);
@@ -50,24 +47,6 @@ export async function getProductById(id) {
   try {
     const { data } = await api.get(`/products/${encodeURIComponent(id)}`);
     return data;
-  } catch (error) {
-    throw normalizeAxiosError(error);
-  }
-}
-
-/**
- * Backend exposes a flat product list; category filtering is applied client-side
- * to match existing shop/category routing behavior.
- *
- * @param {string} [category]
- * @returns {Promise<Array>}
- */
-export async function getProductsByCategory(category) {
-  const slug = normalizeCategory(category);
-  try {
-    const products = await getProducts();
-    if (!slug) return products;
-    return products.filter((p) => productMatchesCategory(p, slug));
   } catch (error) {
     throw normalizeAxiosError(error);
   }

@@ -9,6 +9,15 @@ body {
   @apply m-0 bg-slate-50 text-slate-800 antialiased transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100;
 }
 
+.product-gallery .swiper-button-next,
+.product-gallery .swiper-button-prev {
+  color: #0f172a;
+}
+
+.product-gallery .swiper-pagination-bullet-active {
+  background: #4f46e5;
+}
+
 @keyframes shimmer {
   0% {
     transform: translateX(-100%);

@@ -4,24 +4,13 @@ import { FiHeart, FiStar } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import QuickViewModal from './QuickViewModal';
 
-const getImage = (image) => {
-  if (!image) return '';
-  return image.startsWith('http') ? image : `http://localhost:5000${image}`;
-};
-
-const getStockLabel = (countInStock = 0) => {
-  if (countInStock <= 0)
-    return { label: 'Out of Stock', className: 'bg-rose-100 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300' };
-  if (countInStock <= 5)
-    return { label: 'Low Stock', className: 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300' };
-  return { label: 'In Stock', className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300' };
-};
+import { getProductImage, getStockMeta } from '../utils/productHelpers';
 
 function ProductCard({ product }) {
   const [quickViewOpen, setQuickViewOpen] = useState(false);
-  const primaryImage = getImage(product?.images?.[0] || product?.image);
-  const secondaryImage = getImage(product?.images?.[1]);
-  const stock = getStockLabel(product?.countInStock);
+  const primaryImage = getProductImage(product?.images?.[0] || product?.image);
+  const secondaryImage = getProductImage(product?.images?.[1]);
+  const stock = getStockMeta(product?.countInStock);
   const rating = Number(product?.rating || 0);
   const price = Number(product?.price || 0).toFixed(2);
 

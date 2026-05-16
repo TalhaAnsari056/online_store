@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { FaInstagram, FaTiktok, FaXTwitter, FaYoutube } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
+import { GENDER_COLLECTIONS, PRODUCT_CATEGORIES } from '../constants/catalog';
 
 const quickLinks = [
   { to: '/', label: 'Home' },
@@ -8,14 +9,6 @@ const quickLinks = [
   { to: '/cart', label: 'Cart' },
   { to: '/login', label: 'Login' },
   { to: '/register', label: 'Register' },
-];
-
-const categories = [
-  { label: 'Men', slug: 'men' },
-  { label: 'Women', slug: 'women' },
-  { label: 'Hoodies', slug: 'hoodies' },
-  { label: 'Sneakers', slug: 'sneakers' },
-  { label: 'Accessories', slug: 'accessories' },
 ];
 
 const linkMotion = {
@@ -56,13 +49,13 @@ function Footer() {
 
         <div>
           <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-100">
-            Categories
+            Collections
           </h4>
           <div className="space-y-2">
-            {categories.map((item) => (
+            {GENDER_COLLECTIONS.map((item) => (
               <motion.div key={item.slug} {...linkMotion}>
                 <Link
-                  to={`/category/${item.slug}`}
+                  to={`/collection/${item.slug}`}
                   className="block text-sm text-slate-600 transition-colors duration-200 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white"
                 >
                   {item.label}
@@ -73,6 +66,24 @@ function Footer() {
         </div>
 
         <div>
+          <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-100">
+            Categories
+          </h4>
+          <motion.div className="space-y-2">
+            {PRODUCT_CATEGORIES.map((item) => (
+              <motion.div key={item.slug} {...linkMotion}>
+                <Link
+                  to={`/category/${item.slug}`}
+                  className="block text-sm text-slate-600 transition-colors duration-200 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white"
+                >
+                  {item.label}
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+
+        <div className="md:col-span-2 lg:col-span-4">
           <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-900 dark:text-slate-100">
             Follow Us
           </h4>
